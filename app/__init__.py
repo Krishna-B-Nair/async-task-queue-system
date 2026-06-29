@@ -17,7 +17,11 @@ def create_app(config_class: type = Config) -> Flask:
     # Dependency Injection: Redis & RQ attached to app context
     redis_conn = Redis.from_url(app.config["REDIS_URL"])
     app.extensions["redis"] = redis_conn
-    app.extensions["task_queue"] = Queue(connection=redis_conn)
+    queue_name = app.config.get("RQ_DEFAULT_QUEUE", "default")
+    app.extensions["rq_queue"] = Queue(
+        queue_name,
+        connection=redis_conn,
+    )
 
     # Initialize extensions
     socketio.init_app(app, cors_allowed_origins="*")
